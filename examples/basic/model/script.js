@@ -3,7 +3,7 @@
 
 var GAME = new WHS.World({
   stats: 'fps', // fps, ms, mb
-  autoresize: true,
+  autoresize: "window",
 
   gravity: {
     x: 0,
@@ -22,10 +22,10 @@ var GAME = new WHS.World({
   }
 });
 
-new WHS.Model({
+var teapot = new WHS.Model({
   geometry: {
-    path: '../../_assets/models/utah-teapot-large.json',
-    physics: '../../_assets/models/utah-teapot-light.json'
+    path: '../../_assets/models/teapot/utah-teapot-large.json',
+    physics: '../../_assets/models/teapot/utah-teapot-light.json'
   },
 
   mass: 100,
@@ -55,7 +55,9 @@ new WHS.Model({
     y: 4,
     z: 4
   }
-}).addTo(GAME, 'wait');
+});
+
+teapot.addTo(GAME);
 
 new WHS.Sphere({
   geometry: {

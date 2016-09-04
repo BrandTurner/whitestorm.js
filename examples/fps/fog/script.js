@@ -818,6 +818,7 @@ var createDict = function(){
   // Thrash, waste and sodomy: IE GC bug
   var iframe = require('./_dom-create')('iframe')
     , i      = enumBugKeys.length
+    , lt     = '<'
     , gt     = '>'
     , iframeDocument;
   iframe.style.display = 'none';
@@ -827,7 +828,7 @@ var createDict = function(){
   // html.removeChild(iframe);
   iframeDocument = iframe.contentWindow.document;
   iframeDocument.open();
-  iframeDocument.write('<script>document.F=Object</script' + gt);
+  iframeDocument.write(lt + 'script' + gt + 'document.F=Object' + lt + '/script' + gt);
   iframeDocument.close();
   createDict = iframeDocument.F;
   while(i--)delete createDict[PROTOTYPE][enumBugKeys[i]];
@@ -845,6 +846,7 @@ module.exports = Object.create || function create(O, Properties){
   } else result = createDict();
   return Properties === undefined ? result : dPs(result, Properties);
 };
+
 },{"./_an-object":28,"./_dom-create":36,"./_enum-bug-keys":37,"./_html":45,"./_object-dps":65,"./_shared-key":81}],64:[function(require,module,exports){
 var anObject       = require('./_an-object')
   , IE8_DOM_DEFINE = require('./_ie8-dom-define')
@@ -1330,11 +1332,9 @@ var LIBRARY            = require('./_library')
   , classof            = require('./_classof')
   , $export            = require('./_export')
   , isObject           = require('./_is-object')
-  , anObject           = require('./_an-object')
   , aFunction          = require('./_a-function')
   , anInstance         = require('./_an-instance')
   , forOf              = require('./_for-of')
-  , setProto           = require('./_set-proto').set
   , speciesConstructor = require('./_species-constructor')
   , task               = require('./_task').set
   , microtask          = require('./_microtask')()
@@ -1624,7 +1624,7 @@ $export($export.S + $export.F * !(USE_NATIVE && require('./_iter-detect')(functi
     return capability.promise;
   }
 });
-},{"./_a-function":25,"./_an-instance":27,"./_an-object":28,"./_classof":30,"./_core":32,"./_ctx":33,"./_export":39,"./_for-of":41,"./_global":42,"./_is-object":51,"./_iter-detect":55,"./_library":59,"./_microtask":61,"./_redefine-all":76,"./_set-proto":78,"./_set-species":79,"./_set-to-string-tag":80,"./_species-constructor":83,"./_task":85,"./_wks":95}],106:[function(require,module,exports){
+},{"./_a-function":25,"./_an-instance":27,"./_classof":30,"./_core":32,"./_ctx":33,"./_export":39,"./_for-of":41,"./_global":42,"./_is-object":51,"./_iter-detect":55,"./_library":59,"./_microtask":61,"./_redefine-all":76,"./_set-species":79,"./_set-to-string-tag":80,"./_species-constructor":83,"./_task":85,"./_wks":95}],106:[function(require,module,exports){
 'use strict';
 var $at  = require('./_string-at')(true);
 
@@ -2230,7 +2230,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var GAME = new WHS.World({
   stats: 'fps', // fps, ms, mb
-  autoresize: true,
+  autoresize: "window",
 
   gravity: {
     x: 0,

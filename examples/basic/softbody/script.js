@@ -3,7 +3,7 @@
 
 var GAME = new WHS.World({
   stats: 'fps', // fps, ms, mb
-  autoresize: true,
+  autoresize: "window",
   softbody: true,
 
   gravity: {
@@ -14,8 +14,8 @@ var GAME = new WHS.World({
 
   camera: {
     far: 10000,
-    y: 100,
-    z: 300
+    y: 10,
+    z: 30
   },
 
   shadowmap: {
@@ -33,16 +33,19 @@ var GAME = new WHS.World({
 
 new WHS.Sphere({ // Softbody (blue).
   geometry: {
-    radius: 12,
-    widthSegments: 32,
-    heightSegments: 32
+    radius: 4,
+    widthSegments: 16,
+    heightSegments: 16
   },
 
   mass: 15,
   softbody: true,
 
   physics: {
-    pressure: 50000
+    pressure: 2000,
+
+    piteration: 40,
+    viteration: 40
   },
 
   material: {
@@ -51,25 +54,29 @@ new WHS.Sphere({ // Softbody (blue).
   },
 
   pos: {
-    y: 12
+    y: 4
   }
-}).addTo(GAME);
+}).addTo(GAME).then(function (obj) {
+  obj.getNative().frustumCulled = false;
+});
 
 new WHS.Sphere({ // Rigidbody (green).
   geometry: {
-    radius: 3,
+    radius: 1,
     widthSegments: 16,
     heightSegments: 16
   },
 
-  mass: 10,
+  mass: 2,
 
   material: {
     color: 0x00ff00
   },
 
   pos: {
-    y: 50
+    y: 30,
+    x: -0.5,
+    z: 0.5
   }
 }).addTo(GAME);
 

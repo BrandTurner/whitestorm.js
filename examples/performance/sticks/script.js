@@ -3,27 +3,30 @@
 
 var GAME = new WHS.World({
   stats: 'fps', // fps, ms, mb
-  autoresize: true,
+  autoresize: "window",
 
   gravity: {
     x: 0,
-    y: -1000,
+    y: -100,
     z: 0
   },
 
   camera: {
-    far: 10000,
-    y: 100,
-    z: 300
+    far: 1000,
+    y: 10,
+    z: 30
   },
 
   shadowmap: {
-    type: THREE.PCFSoftShadowMap
+    type: THREE.PCFShadowMap
   },
 
   physics: {
-    fixedTimeStep: 1 / 120
+    broadphase: { type: 'sweepprune' }
   },
+
+  rHeight: 1.5,
+  rWidth: 1.5,
 
   background: {
     color: 0xaaaaaa
@@ -32,25 +35,29 @@ var GAME = new WHS.World({
 
 var stick = new WHS.Box({
   geometry: {
-    width: 40,
-    height: 8,
-    depth: 8
+    width: 5,
+    height: 1,
+    depth: 1
   },
 
-  mass: 75,
+  mass: 1,
 
   material: {
     kind: 'phong',
     map: WHS.texture('../../_assets/textures/retina_wood.jpg'),
     specularMap: WHS.texture('../../_assets/textures/SpecularMap.png'),
     normalMap: WHS.texture('../../_assets/textures/NormalMap.png'),
-    shininess: 0,
-    friction: 0,
-    restitution: 0
+    shininess: 0
+  },
+
+  physics: {
+    restitution: 0,
+    friction: 0.5,
+    state: 4
   },
 
   pos: {
-    y: 4
+    y: 0.5
   }
 });
 
@@ -59,8 +66,8 @@ stick2.position.set(0, 4, 20);
 
 var height = 10; // BASE: 6, 0, 2, 2.
 var delta = 0;
-var cols = 3,
-    rows = 3;
+var cols = 8,
+    rows = 4;
 
 var objects = 0;
 
@@ -72,16 +79,16 @@ for (var k = 0; k < rows; k++) {
 
       if (i % 2 === 0) {
         newStick.quaternion.setFromEuler(new THREE.Euler(0, Math.PI / 2, 0));
-        newStick.position.set(8 + 41 * k, 4 + delta + (8 + delta) * i, 8 + 41 * j);
+        newStick.position.set(1 + 6 * k, 0.5 + delta + (1 + delta) * i, 1 + 6 * j);
 
         newStick2.quaternion.setFromEuler(new THREE.Euler(0, Math.PI / 2, 0));
-        newStick2.position.set(-8 + 41 * k, 4 + delta + (8 + delta) * i, 8 + 41 * j);
+        newStick2.position.set(-1 + 6 * k, 0.5 + delta + (1 + delta) * i, 1 + 6 * j);
       } else {
-        newStick.position.y = 4 + delta + (8 + delta) * i;
-        newStick2.position.y = 4 + delta + (8 + delta) * i;
-        newStick.position.z = 41 * j;
-        newStick2.position.z = 16 + 41 * j;
-        newStick.position.x = newStick2.position.x = 41 * k;
+        newStick.position.y = 0.5 + delta + (1 + delta) * i;
+        newStick2.position.y = 0.5 + delta + (1 + delta) * i;
+        newStick.position.z = 6 * j;
+        newStick2.position.z = 2 + 6 * j;
+        newStick.position.x = newStick2.position.x = 6 * k;
       }
 
       objects += 2;
@@ -94,14 +101,14 @@ for (var k = 0; k < rows; k++) {
 
 document.querySelector('.object_count').innerText = objects + ' objects';
 
-new WHS.Sphere({
+window.sphere = new WHS.Sphere({
   geometry: {
-    radius: 12,
+    radius: 1,
     widthSegments: 32,
     heightSegments: 32
   },
 
-  mass: 1000,
+  mass: 100,
 
   material: {
     color: 0x000ff,
@@ -109,22 +116,24 @@ new WHS.Sphere({
   },
 
   pos: {
-    x: -100,
-    y: 12
+    x: -20,
+    y: 1
   }
-}).addTo(GAME).then(function (sphere) {
-  var mx = 1000,
-      mz = 500;
+});
+
+window.sphere.addTo(GAME).then(function (sphere) {
+  var mx = 60,
+      mz = 40;
 
   sphere.setAngularVelocity({ x: mx, y: 0, z: mz });
   sphere.setLinearVelocity({ x: mx, y: 0, z: mz });
 });
 
-new WHS.Box({
+window.ground = new WHS.Box({
   geometry: {
-    width: 2500,
-    height: 1,
-    depth: 2500
+    width: 250,
+    height: 5,
+    depth: 250
   },
 
   mass: 0,
@@ -135,12 +144,17 @@ new WHS.Box({
     kind: 'phong'
   },
 
+  physics: {
+    margin: 1
+  },
+
   pos: {
     x: 0,
-    y: 0,
+    y: -3,
     z: 0
   }
-}).addTo(GAME);
+});
+window.ground.addTo(GAME);
 
 var light = new WHS.DirectionalLight({
   light: {
@@ -150,10 +164,10 @@ var light = new WHS.DirectionalLight({
   },
 
   shadowmap: {
-    far: 2500,
+    far: 250,
 
-    left: -400,
-    right: 400
+    left: -40,
+    right: 40
   },
 
   pos: {

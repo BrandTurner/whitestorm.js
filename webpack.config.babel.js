@@ -4,85 +4,81 @@ import HappyPack from 'happypack';
 
 process.env.BABEL_ENV = 'browser';
 
-export function config({production}) {
-  console.log(production ? 'Production mode' : 'Development mode');
+export function config({isProduction, frameworkSrc, frameworkDest}) {
+  console.log(isProduction ? 'Production mode' : 'Development mode');
 
-  return {
-    devtool: production ? 'hidden-source-map' : 'source-map',
-    entry: './src/index.js',
+  const loadersSection = [
+    {
+      test: /\.js$/,
+      exclude: /node_modules/,
+      loader: 'babel',
+      happy: { id: 'js' }
+    }
+  ];
+
+  const pluginsSectionPhysics = isProduction
+  ? [
+    new webpack.optimize.DedupePlugin(),
+    new webpack.optimize.UglifyJsPlugin({
+      mangle: false,
+      compress: false,
+      minimize: true
+    }),
+    new HappyPack({loaders: ['babel'], threads: 4}),
+    new webpack.NormalModuleReplacementPlugin(/inline\-worker/, 'webworkify-webpack')
+  ]
+  : [
+    new HappyPack({loaders: ['babel'], threads: 4}),
+    new webpack.NormalModuleReplacementPlugin(/inline\-worker/, 'webworkify-webpack')
+  ];
+
+  const pluginsSectionLight = isProduction
+  ? [
+    new webpack.optimize.DedupePlugin(),
+    new webpack.optimize.UglifyJsPlugin({
+      mangle: false,
+      compress: {
+        warnings: false
+      },
+      minimize: true
+    }),
+    new HappyPack({loaders: ['babel'], threads: 4})
+  ]
+  : [
+    new HappyPack({loaders: ['babel'], threads: 4})
+  ];
+
+  return [{ // PHYSICS VERSION
+    devtool: isProduction ? 'hidden-source-map' : 'source-map',
+    entry: ['babel-polyfill', `${frameworkSrc}/index.js`],
     target: 'web',
     output: {
-      path: path.join(__dirname, 'build'),
+      path: path.join(__dirname, frameworkDest),
       filename: 'whitestorm.js',
       library: 'WHS',
-      libraryTarget: 'var'
+      libraryTarget: 'umd'
     },
     module: {
-      preLoaders: [
-        {
-          test: /scene\.js$/,
-          loader: 'string-replace',
-          query: {
-            multiple: [
-              {
-                search: 'from \'inline-worker\';',
-                replace: 'from \'webworkify-webpack\';'
-              },
-              {
-                search: 'new Worker(require(\'../worker.js\'));',
-                replace: 'Worker(require(\'../worker.js\'));'
-              }
-            ]
-          }
-        }
-      ],
-      loaders: [
-        {
-          test: /\.js$/,
-          exclude: /node_modules/,
-          loader: 'babel',
-          happy: { id: 'js' }
-        }
-      ]
+      loaders: loadersSection
     },
-    plugins: production
-      ? [
-        new webpack.optimize.DedupePlugin(),
-        new webpack.optimize.UglifyJsPlugin({
-          mangle: false,
-          compress: {
-            warnings: false
-          }
-        }),
-        new HappyPack({loaders: ['babel', 'string-replace'], threads: 4})
-      ]
-      : [
-        new HappyPack({loaders: ['babel', 'string-replace'], threads: 4})
-      ]
-  };
-}
-
-export function light_config({production}) {
-  const conf = config({production});
-  conf.output.filename = 'whitestorm.light.js';
-
-  conf.module.preLoaders.push({
-    test: /\.js$/,
-    loader: 'string-replace',
-    query: {
-      multiple: [
-        {
-          search: 'physics/index.js\';',
-          replace: 'physics/nophysi.js\';'
-        },
-        {
-          search: '!!\'physics\'',
-          replace: 'false',
-          flags: 'g'
-        }
-      ]
-    }
-  });
-
-  return conf;
+    plugins: pluginsSectionPhysics
+  }, { // LIGHT VERSION
+    devtool: isProduction ? 'hidden-source-map' : 'source-map',
+    entry: ['babel-polyfill', `${frameworkSrc}/index.js`],
+    target: 'web',
+    output: {
+      path: path.join(__dirname, frameworkDest),
+      filename: 'whitestorm.light.js',
+      library: 'WHS',
+      libraryTarget: 'umd'
+    },
+    externals: {
+      '../physics/index.js': 'var false',
+      './physics/index.js': 'var false'
+    },
+    module: {
+      loaders: loadersSection
+    },
+    plugins: pluginsSectionLight
+  }];
 }
